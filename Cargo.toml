@@ -1,0 +1,15 @@
+[package]
+name = "drshell"
+version = "0.0.1"
+authors = ["David_River <hekachacha@gmail.com>"]
+edition = "2021"
+rust-version = "1.80"
+
+[dependencies]
+shlex = "1.3"
+rustyline = { version = "17", features = ["custom-bindings"] }
+lazy_static = "1.5.0"
+
+[profile.dev]
+opt-level = 0
+debug = true
