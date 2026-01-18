@@ -137,6 +137,7 @@ pub fn input_history() -> Option<String> {
 }
 
 pub fn read_from_file(file: String) {
+    let mut status = HISTORY_STATUS.lock().unwrap();
     let mut history = HISTORY_CMDS.lock().unwrap();
     let mut buffer = String::new();
 
@@ -154,6 +155,12 @@ pub fn read_from_file(file: String) {
     for line in buffer.lines() {
         history.push(line.to_string());
     }
+
+    *status = Status {
+        pos_cursor: { history.len() - 1 },
+        in_history_mode: false,
+        last_direction: Direction::Up,
+    };
 }
 
 pub fn write_to_file(file: String) {
