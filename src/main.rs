@@ -82,7 +82,7 @@ fn main() -> rustyline::Result<()> {
 
 fn handle_history_with_line(mut line: String) -> String {
     if let Some(input) = commands::api(commands::Api::InputHistory) {
-        line = input + &line;
+        line = input;
     }
     if !line.is_empty() {
         let _ = commands::api(commands::Api::SaveHistory(&line));

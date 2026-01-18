@@ -14,6 +14,7 @@ lazy_static! {
 
 struct Status {
     pos_cursor: usize,
+    pos_cursor_save: usize,
     in_history_mode: bool,
     last_direction: Direction,
 }
@@ -22,13 +23,15 @@ struct Status {
 enum Direction {
     Up,
     Down,
+    None,
 }
 
 lazy_static! {
     static ref HISTORY_STATUS: Mutex<Status> = Mutex::new(Status {
         pos_cursor: 0,
+        pos_cursor_save: 0,
         in_history_mode: false,
-        last_direction: Direction::Up,
+        last_direction: Direction::None,
     });
 }
 
@@ -55,9 +58,10 @@ pub fn save_history(h: &str) {
     history.push(h.to_string());
 
     *status = Status {
-        pos_cursor: { history.len() - 1 },
+        pos_cursor: history.len() - 1,
+        pos_cursor_save: 0,
         in_history_mode: false,
-        last_direction: Direction::Up,
+        last_direction: Direction::None,
     };
 }
 
@@ -86,6 +90,7 @@ pub fn display_previous_cmd() {
     }
     io::stdout().flush();
 
+    (*status).pos_cursor_save = (*status).pos_cursor;
     if (*status).in_history_mode == false {
         (*status).in_history_mode = true;
     }
@@ -116,6 +121,7 @@ pub fn display_next_cmd() {
     }
     io::stdout().flush();
 
+    (*status).pos_cursor_save = (*status).pos_cursor;
     if (*status).in_history_mode == false {
         (*status).in_history_mode = true;
     }
@@ -130,13 +136,14 @@ pub fn input_history() -> Option<String> {
     let mut status = HISTORY_STATUS.lock().unwrap();
 
     if (*status).in_history_mode {
-        Some(history.get((*status).pos_cursor).unwrap().to_string())
+        Some(history.get((*status).pos_cursor_save).unwrap().to_string())
     } else {
         None
     }
 }
 
 pub fn read_from_file(file: String) {
+    let mut status = HISTORY_STATUS.lock().unwrap();
     let mut history = HISTORY_CMDS.lock().unwrap();
     let mut buffer = String::new();
 
@@ -154,6 +161,19 @@ pub fn read_from_file(file: String) {
     for line in buffer.lines() {
         history.push(line.to_string());
     }
+
+    *status = Status {
+        pos_cursor: {
+            if !history.is_empty() {
+                history.len() - 1
+            } else {
+                0
+            }
+        },
+        pos_cursor_save: 0,
+        in_history_mode: false,
+        last_direction: Direction::None,
+    };
 }
 
 pub fn write_to_file(file: String) {
