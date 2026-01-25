@@ -2,7 +2,7 @@ use super::super::commands::{self, Api};
 use super::Rustyline;
 
 use rustyline::{
-    Cmd, ConditionalEventHandler, Event, EventContext, EventHandler, KeyCode, KeyEvent, RepeatCount,
+    Cmd, ConditionalEventHandler, Event, EventContext, KeyCode, KeyEvent, RepeatCount,
 };
 
 impl ConditionalEventHandler for Rustyline {

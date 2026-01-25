@@ -25,37 +25,25 @@ pub enum OptParseFail {
     WrongOpt,
 }
 
-fn find_last_opt(opts: &Vec<Opt>, opt: OptFind) -> Option<&Opt> {
+fn find_last_opt(opts: &[Opt], opt: OptFind) -> Option<&Opt> {
     match opt {
         OptFind::Stdout => opts
             .iter()
-            .filter(|opt| match opt {
-                Opt::RedirectStdout(_) | Opt::AppendStdout(_) => true,
-                _ => false,
-            })
-            .last(),
+            .filter(|opt| matches!(opt, Opt::RedirectStdout(_) | Opt::AppendStdout(_)))
+            .next_back(),
         OptFind::Stderr => opts
             .iter()
-            .filter(|opt| match opt {
-                Opt::RedirectStderr(_) | Opt::AppendStderr(_) => true,
-                _ => false,
-            })
-            .last(),
+            .filter(|opt| matches!(opt, Opt::RedirectStderr(_) | Opt::AppendStderr(_)))
+            .next_back(),
     }
 }
 
 /* first -> stdout, second -> stderr */
-pub fn find_last_opts(opts: &Vec<Opt>) -> (Option<&Opt>, Option<&Opt>) {
-    let mut ret = (None, None);
-
-    if let Some(opt) = find_last_opt(opts, OptFind::Stdout) {
-        ret.0 = Some(opt);
-    }
-    if let Some(opt) = find_last_opt(opts, OptFind::Stderr) {
-        ret.1 = Some(opt);
-    }
-
-    ret
+pub fn find_last_opts(opts: &[Opt]) -> (Option<&Opt>, Option<&Opt>) {
+    (
+        find_last_opt(opts, OptFind::Stdout),
+        find_last_opt(opts, OptFind::Stderr),
+    )
 }
 
 pub fn generate_opt(opt: &Opt) -> Command {
@@ -91,26 +79,16 @@ pub fn generate_opt(opt: &Opt) -> Command {
 }
 
 pub fn parse_opt(opt: Vec<String>) -> Result<Opt, OptParseFail> {
-    if opt.is_empty() {
-        return Err(OptParseFail::NoOpt);
-    }
-    let optname = opt.get(0).expect("never");
-    let mut filename = String::new();
-    if let Some(name) = opt.get(1) {
-        filename = name.to_string();
-    }
-    let mut ret = match optname.as_str() {
-        "redirect_stdout" => Ok(Opt::RedirectStdout(filename.clone())),
-        "redirect_stderr" => Ok(Opt::RedirectStdout(filename.clone())),
-        "append_stdout" => Ok(Opt::AppendStdout(filename.clone())),
-        "append_stderr" => Ok(Opt::AppendStderr(filename.clone())),
-        &_ => return Err(OptParseFail::WrongOpt),
-    };
-    if filename.is_empty() {
-        ret = Err(OptParseFail::NofileName);
-    }
+    let optname = opt.first().ok_or(OptParseFail::NoOpt)?.as_str();
+    let filename = opt.get(1).ok_or(OptParseFail::NofileName)?.to_string();
 
-    ret
+    match optname {
+        "redirect_stdout" => Ok(Opt::RedirectStdout(filename)),
+        "redirect_stderr" => Ok(Opt::RedirectStdout(filename)),
+        "append_stdout" => Ok(Opt::AppendStdout(filename)),
+        "append_stderr" => Ok(Opt::AppendStderr(filename)),
+        &_ => Err(OptParseFail::WrongOpt),
+    }
 }
 
 pub fn operator_action(opt: Opt) {
@@ -156,7 +134,6 @@ pub fn operator_action(opt: Opt) {
         }
 
         fs::OpenOptions::new()
-            .write(true)
             .append(true)
             .open(path)
             .expect("can't open the file!!!")

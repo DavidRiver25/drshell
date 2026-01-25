@@ -29,11 +29,10 @@ pub enum Cmd {
 }
 
 #[derive(Debug)]
-enum HistoryArgs {
+pub enum HistoryArgs {
     Show(Option<usize>),
     ReadFromFile(String),
     WriteToFile(String),
-    AppendToFile(String),
 }
 
 pub enum CmdParseFail {
@@ -100,14 +99,13 @@ pub fn parse_cmd(mut cmd: Vec<String>) -> Result<Cmd, CmdParseFail> {
             let len = cmd.len();
             if len > 1 {
                 let arg_1 = cmd[1].as_str();
-                if arg_1 == "-r" || arg_1 == "-w" || arg_1 == "-a" {
+                if arg_1 == "-r" || arg_1 == "-w" {
                     if len < 3 {
                         Err(CmdParseFail::HistoryArgsError)
                     } else {
                         match arg_1 {
                             "-r" => Ok(Cmd::History(HistoryArgs::ReadFromFile(cmd[2].to_string()))),
                             "-w" => Ok(Cmd::History(HistoryArgs::WriteToFile(cmd[2].to_string()))),
-                            "-a" => Ok(Cmd::History(HistoryArgs::AppendToFile(cmd[2].to_string()))),
                             &_ => Err(CmdParseFail::Never),
                         }
                     }
@@ -166,7 +164,6 @@ pub fn eval(cmd: Cmd) {
             HistoryArgs::Show(limit) => history::history(limit),
             HistoryArgs::ReadFromFile(path) => history::read_from_file(path),
             HistoryArgs::WriteToFile(path) => history::write_to_file(path),
-            HistoryArgs::AppendToFile(path) => history::append_to_file(path),
         },
         Cmd::NotBuiltin(cmd) => {
             let mut args = cmd.clone();
@@ -242,10 +239,6 @@ pub fn generate_cmd(cmd: Cmd) -> Command {
                     }
                     HistoryArgs::WriteToFile(path) => {
                         args.push("-w".to_string());
-                        args.push(path);
-                    }
-                    HistoryArgs::AppendToFile(path) => {
-                        args.push("-a".to_string());
                         args.push(path);
                     }
                 }

@@ -100,7 +100,7 @@ impl Completer for Rustyline {
         if !line[start..pos].contains(' ') {
             result = complete_cmds(line, start);
         } else if let Some(pos) = line.rfind(" | ") {
-            let mut content = line[(pos + 3)..].to_string();
+            let content = line[(pos + 3)..].to_string();
             /* trim white space at start */
             if let Some(index) = content.find(|c| c != ' ') {
                 if !line[pos + 3 + index..].contains(' ') {
