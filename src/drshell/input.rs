@@ -20,7 +20,7 @@ struct CmdsNoSplitAndOperators {
 
 fn split_operators(input: String) -> Result<CmdsNoSplitAndOperators, InputSplitFail> {
     let input = input.trim_end();
-    let input = shlex::split(&input).ok_or(InputSplitFail::ShlexError)?;
+    let input = shlex::split(input).ok_or(InputSplitFail::ShlexError)?;
 
     let last = input.last();
     match last {
@@ -80,13 +80,11 @@ fn split_cmds(cmds: Vec<String>) -> Result<Vec<Vec<String>>, InputSplitFail> {
         .collect();
 
     if index.is_empty() {
-        let mut ret: Vec<Vec<String>> = Vec::new();
-        ret.push(cmds);
-        return Ok(ret);
+        return Ok(vec![cmds]);
     } else {
         let first = *index.first().expect("never");
         let last = *index.last().expect("never");
-        if first == 0 as usize || last == cmds.len() - 1 {
+        if first == 0_usize || last == cmds.len() - 1 {
             return Err(InputSplitFail::NoPipCmd);
         }
         let mut previous = first;

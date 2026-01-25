@@ -1,7 +1,7 @@
 mod cmp;
 mod event;
 
-use rustyline::{highlight::Highlighter, hint::Hinter, validate::Validator, Editor, Helper};
+use rustyline::{highlight::Highlighter, hint::Hinter, validate::Validator, Helper};
 
 #[derive(Debug, Default)]
 pub struct Rustyline;

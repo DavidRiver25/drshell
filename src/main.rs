@@ -47,7 +47,7 @@ fn main() -> rustyline::Result<()> {
                 let line = handle_history_with_line(line);
                 match input::split_input(line) {
                     Ok(cmds_and_operators) => {
-                        let Some((mut cmds, opts)) = parse_cmds_and_opts(cmds_and_operators) else {
+                        let Some((cmds, opts)) = parse_cmds_and_opts(cmds_and_operators) else {
                             continue 'repl;
                         };
                         execute_cmds_and_opts(cmds, opts);

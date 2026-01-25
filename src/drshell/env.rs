@@ -1,10 +1,8 @@
-use lazy_static::lazy_static;
-use std::env::{self, current_dir};
+use std::env;
 use std::fs;
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Exe {
@@ -63,12 +61,10 @@ pub fn find_exes() -> Vec<Exe> {
     };
     for dir in env::split_paths(&path_var) {
         if let Ok(entries) = fs::read_dir(dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    if let Some(exe) = if_exe(&path) {
-                        exes.push(exe);
-                    }
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if let Some(exe) = if_exe(&path) {
+                    exes.push(exe);
                 }
             }
         }
@@ -82,12 +78,10 @@ pub fn find_current_dir_files() -> Vec<String> {
 
     if let Ok(dir) = env::current_dir() {
         if let Ok(entries) = fs::read_dir(dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let name = entry.file_name();
-                    if let Some(name) = name.to_str() {
-                        files.push(name.to_string());
-                    }
+            for entry in entries.flatten() {
+                let name = entry.file_name();
+                if let Some(name) = name.to_str() {
+                    files.push(name.to_string());
                 }
             }
         }
@@ -98,12 +92,10 @@ pub fn find_current_dir_files() -> Vec<String> {
 
 fn if_exe(path: &PathBuf) -> Option<Exe> {
     if path.is_file() {
-        let Some(p) = path.to_str() else {
-            return None;
-        };
+        let p = path.to_str()?;
         #[cfg(unix)]
         {
-            let Ok(metadata) = fs::metadata(&path) else {
+            let Ok(metadata) = fs::metadata(path) else {
                 return None;
             };
             let mode = metadata.permissions().mode();
