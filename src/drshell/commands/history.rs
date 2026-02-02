@@ -7,6 +7,13 @@ use std::{
     sync::Mutex,
 };
 
+#[derive(Debug)]
+pub enum HistoryArgs {
+    Show(Option<usize>),
+    ReadFromFile(String),
+    WriteToFile(String),
+}
+
 lazy_static! {
     static ref HISTORY_CMDS: Mutex<Vec<String>> = Mutex::new(vec![]);
 }

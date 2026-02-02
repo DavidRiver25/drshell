@@ -64,6 +64,14 @@ Usage:
 history <LIMIT> | <-w FILE> | <-r FILE> | <-a FILE>"
             );
         }
+        "cp" => {
+            println!(
+                "Description:
+copy the file or directory to the destination from the source
+Usage:
+cp <SOURCE> <DESTINATION>"
+            );
+        }
         &_ => {}
     }
 }
