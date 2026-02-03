@@ -4,7 +4,7 @@ use crate::drshell::args::{self, ArgsParseSuccess};
 use crate::drshell::commands::{self, Api};
 use crate::drshell::input::{self, CmdsAndOperators};
 use crate::drshell::operators;
-use crate::drshell::pipline::{self, Pipeline};
+use crate::drshell::pipeline::{self, Pipeline};
 use crate::drshell::rustyline::Rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::{Config, Editor, Event, EventHandler, KeyCode, KeyEvent, Modifiers};
@@ -114,7 +114,7 @@ fn execute_cmds_and_opts(mut cmds: Vec<commands::Cmd>, opts: Vec<operators::Opt>
         return;
     }
 
-    let mut cmds_generate = pipline::Cmds::new();
+    let mut cmds_generate = pipeline::Cmds::new();
     for cmd in cmds {
         let cmd = commands::generate_cmd(cmd);
         cmds_generate.add_cmd(cmd);
