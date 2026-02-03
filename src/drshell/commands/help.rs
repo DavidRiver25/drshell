@@ -69,7 +69,10 @@ history <LIMIT> | <-w FILE> | <-r FILE> | <-a FILE>"
                 "Description:
 copy the file or directory to the destination from the source
 Usage:
-cp <SOURCE> <DESTINATION>"
+cp <SOURCE> <DESTINATION>
+Warning:
+1. when copy a file, the path of destination must exist 
+2. when copy a path, if the path of destination doesn't exist, the shell will try to create it"
             );
         }
         &_ => {}

@@ -10,6 +10,7 @@ the built-ins support the arg "-h" to show their descriptions.
 * cd
 * lsbuiltin
 * history
+* cp
 ### redirections
 * \> or 1\> (redirect stdout to write to a new file)
 * \>\> or 1\>\> (redirect stdout to append to a file)

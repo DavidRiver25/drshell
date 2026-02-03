@@ -192,6 +192,7 @@ pub fn eval(cmd: Cmd) {
             HistoryArgs::ReadFromFile(path) => history::read_from_file(path),
             HistoryArgs::WriteToFile(path) => history::write_to_file(path),
         },
+        Cmd::Cp(args_cp) => cp::copy(args_cp),
         Cmd::NotBuiltin(cmd) => {
             let mut args = cmd.clone();
             args.remove(0);
@@ -205,9 +206,6 @@ pub fn eval(cmd: Cmd) {
                     eprintln!("{}", err);
                 }
             }
-        }
-        Cmd::Cp(args_cp) => {
-            cp::copy(args_cp);
         }
     }
 }
@@ -298,5 +296,6 @@ pub fn api(api: Api) -> Option<String> {
         Api::ReadHistoryFromFile(file) => history::read_from_file(file.to_string()),
         Api::WriteHistoryToFile(file) => history::write_to_file(file.to_string()),
     }
+
     None
 }
