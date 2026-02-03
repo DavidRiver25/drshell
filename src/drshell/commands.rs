@@ -1,4 +1,5 @@
 mod cd;
+mod cp;
 mod echo;
 mod exit;
 mod help;
@@ -8,9 +9,20 @@ mod pwd;
 mod r#type;
 
 use super::env as drshell_env;
+use cp::CpArgs;
+use history::HistoryArgs;
 use std::process::Command;
 
-pub const BUILTIN_CMDS: [&str; 7] = ["echo", "exit", "type", "pwd", "cd", "lsbuiltin", "history"];
+pub const BUILTIN_CMDS: [&str; 8] = [
+    "echo",
+    "exit",
+    "type",
+    "pwd",
+    "cd",
+    "lsbuiltin",
+    "history",
+    "cp",
+];
 
 #[allow(dead_code)]
 const BUILTIN_ARGS: [&str; 1] = ["-h"];
@@ -25,14 +37,8 @@ pub enum Cmd {
     BuiltinLs,
     BuiltinHelp(&'static str),
     History(HistoryArgs),
+    Cp(CpArgs),
     NotBuiltin(Vec<String>),
-}
-
-#[derive(Debug)]
-pub enum HistoryArgs {
-    Show(Option<usize>),
-    ReadFromFile(String),
-    WriteToFile(String),
 }
 
 pub enum CmdParseFail {
@@ -42,7 +48,13 @@ pub enum CmdParseFail {
     TypeArgsError,
     CdArgsError,
     HistoryArgsError,
+    CpArgsError(CpError),
     Never,
+}
+
+pub enum CpError {
+    NoSrc,
+    NoDes,
 }
 
 pub enum Api<'a> {
@@ -119,6 +131,17 @@ pub fn parse_cmd(mut cmd: Vec<String>) -> Result<Cmd, CmdParseFail> {
                 Ok(Cmd::History(HistoryArgs::Show(None)))
             }
         }
+        "cp" => {
+            let src = cmd
+                .get(1)
+                .ok_or(CmdParseFail::CpArgsError(CpError::NoSrc))?
+                .into();
+            let des = cmd
+                .get(2)
+                .ok_or(CmdParseFail::CpArgsError(CpError::NoDes))?
+                .into();
+            Ok(Cmd::Cp(CpArgs { src, des }))
+        }
         _ => {
             if let Some(_path) = drshell_env::if_executable(&cmd[0]) {
                 Ok(Cmd::NotBuiltin(cmd))
@@ -147,6 +170,10 @@ pub fn parse_cmd_fail_process(reason: CmdParseFail) {
         CmdParseFail::HistoryArgsError => {
             eprintln!("wrong args for history!!!");
         }
+        CmdParseFail::CpArgsError(err) => match err {
+            CpError::NoSrc => eprintln!("no source for cp!!!"),
+            CpError::NoDes => eprintln!("no destination for cp!!!"),
+        },
         CmdParseFail::Never => {}
     }
 }
@@ -165,6 +192,7 @@ pub fn eval(cmd: Cmd) {
             HistoryArgs::ReadFromFile(path) => history::read_from_file(path),
             HistoryArgs::WriteToFile(path) => history::write_to_file(path),
         },
+        Cmd::Cp(args_cp) => cp::copy(args_cp),
         Cmd::NotBuiltin(cmd) => {
             let mut args = cmd.clone();
             args.remove(0);
@@ -243,6 +271,11 @@ pub fn generate_cmd(cmd: Cmd) -> Command {
                     }
                 }
             }
+            Cmd::Cp(args_cp) => {
+                args.push("cp".to_string());
+                args.push(args_cp.src);
+                args.push(args_cp.des);
+            }
             _ => {}
         }
     }
@@ -263,5 +296,6 @@ pub fn api(api: Api) -> Option<String> {
         Api::ReadHistoryFromFile(file) => history::read_from_file(file.to_string()),
         Api::WriteHistoryToFile(file) => history::write_to_file(file.to_string()),
     }
+
     None
 }
