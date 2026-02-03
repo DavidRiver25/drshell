@@ -1,3 +1,5 @@
+use std::iter;
+
 use super::super::commands;
 use super::super::env as drshell_env;
 use super::Rustyline;
@@ -21,6 +23,18 @@ fn sort_cmds() -> Vec<String> {
             }
         }
         unrepeat.push(cmd.to_string());
+    }
+
+    let mut index = vec![];
+    for (i, u) in unrepeat.iter().enumerate() {
+        for c in commands::BUILTIN_CMDS {
+            if c == u {
+                index.push(i);
+            }
+        }
+    }
+    for i in index.iter().rev() {
+        unrepeat.remove(*i);
     }
 
     for cmd in commands::BUILTIN_CMDS {
