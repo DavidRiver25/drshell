@@ -29,12 +29,10 @@ fn find_last_opt(opts: &[Opt], opt: OptFind) -> Option<&Opt> {
     match opt {
         OptFind::Stdout => opts
             .iter()
-            .filter(|opt| matches!(opt, Opt::RedirectStdout(_) | Opt::AppendStdout(_)))
-            .next_back(),
+            .rfind(|opt| matches!(opt, Opt::RedirectStdout(_) | Opt::AppendStdout(_))),
         OptFind::Stderr => opts
             .iter()
-            .filter(|opt| matches!(opt, Opt::RedirectStderr(_) | Opt::AppendStderr(_)))
-            .next_back(),
+            .rfind(|opt| matches!(opt, Opt::RedirectStderr(_) | Opt::AppendStderr(_))),
     }
 }
 
