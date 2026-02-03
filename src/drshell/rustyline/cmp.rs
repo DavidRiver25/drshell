@@ -1,5 +1,3 @@
-use std::iter;
-
 use super::super::commands;
 use super::super::env as drshell_env;
 use super::Rustyline;
