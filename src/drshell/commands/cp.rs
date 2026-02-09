@@ -84,10 +84,10 @@ fn copy_recursive_paths(arg: CpArgs) {
 
     if s.is_file() {
         let mut name_get: &str = "";
-        if let Some(name) = s.file_name() {
-            if let Some(name) = name.to_str() {
-                name_get = name;
-            }
+        if let Some(name) = s.file_name()
+            && let Some(name) = name.to_str()
+        {
+            name_get = name;
         }
         if name_get.is_empty() {
             eprintln!("can't get the file name!!!");

@@ -128,9 +128,13 @@ fn execute_cmds_and_opts(mut cmds: Vec<commands::Cmd>, opts: Vec<operators::Opt>
     }
 
     let mut pipeline = Pipeline::new();
-    if pipeline.pipe(cmds_generate).is_ok() {
-        pipeline.wait();
-    } else if let Err(err) = pipeline.kill() {
-        eprintln!("{}", err);
+    match pipeline.pipe(cmds_generate) {
+        Ok(_) => pipeline.wait(),
+        Err(e) => {
+            eprintln!("{e}");
+            if let Err(e) = pipeline.kill() {
+                eprintln!("{e}");
+            }
+        }
     }
 }

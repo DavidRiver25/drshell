@@ -2,8 +2,8 @@
 name = "drshell"
 version = "0.0.1"
 authors = ["David_River <hekachacha@gmail.com>"]
-edition = "2021"
-rust-version = "1.80"
+edition = "2024"
+rust-version = "1.88"
 
 [dependencies]
 shlex = "1.3"

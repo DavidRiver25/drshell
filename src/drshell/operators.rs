@@ -113,10 +113,10 @@ pub fn operator_action(opt: Opt) {
     let mut line = String::new();
     let stdin = io::stdin();
 
-    if flag_redirect || !path.exists() {
-        if let Err(err) = fs::write(path, "") {
-            eprintln!("{}", err);
-        }
+    if (flag_redirect || !path.exists())
+        && let Err(err) = fs::write(path, "")
+    {
+        eprintln!("{}", err);
     }
     loop {
         match stdin.read_line(&mut line) {
