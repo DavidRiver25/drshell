@@ -76,13 +76,13 @@ pub fn find_exes() -> Vec<Exe> {
 pub fn find_current_dir_files() -> Vec<String> {
     let mut files = Vec::new();
 
-    if let Ok(dir) = env::current_dir() {
-        if let Ok(entries) = fs::read_dir(dir) {
-            for entry in entries.flatten() {
-                let name = entry.file_name();
-                if let Some(name) = name.to_str() {
-                    files.push(name.to_string());
-                }
+    if let Ok(dir) = env::current_dir()
+        && let Ok(entries) = fs::read_dir(dir)
+    {
+        for entry in entries.flatten() {
+            let name = entry.file_name();
+            if let Some(name) = name.to_str() {
+                files.push(name.to_string());
             }
         }
     }
@@ -99,32 +99,30 @@ fn if_exe(path: &PathBuf) -> Option<Exe> {
                 return None;
             };
             let mode = metadata.permissions().mode();
-            if mode & 0o111 != 0 {
-                if let Some(name) = path.file_name() {
-                    if let Some(name) = name.to_str() {
-                        return Some(Exe {
-                            name: name.to_string(),
-                            path: p.to_string(),
-                        });
-                    }
-                }
+            if mode & 0o111 != 0
+                && let Some(name) = path.file_name()
+                && let Some(name) = name.to_str()
+            {
+                return Some(Exe {
+                    name: name.to_string(),
+                    path: p.to_string(),
+                });
             }
         }
         #[cfg(windows)]
         {
-            if let Some(name) = path.file_name() {
-                if let Some(name) = name.to_str() {
-                    if name.ends_with(".exe") {
-                        let name = name
-                            .chars()
-                            .take(name.chars().count().saturating_sub(4))
-                            .collect::<String>();
-                        return Some(Exe {
-                            name,
-                            path: p.to_string(),
-                        });
-                    }
-                }
+            if let Some(name) = path.file_name()
+                && let Some(name) = name.to_str()
+                && name.ends_with(".exe")
+            {
+                let name = name
+                    .chars()
+                    .take(name.chars().count().saturating_sub(4))
+                    .collect::<String>();
+                return Some(Exe {
+                    name,
+                    path: p.to_string(),
+                });
             }
         }
     }

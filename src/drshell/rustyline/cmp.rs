@@ -1,9 +1,9 @@
 use super::super::commands;
 use super::super::env as drshell_env;
 use super::Rustyline;
+use rustyline::Context;
 use rustyline::completion::{Completer, Pair};
 use rustyline::error::ReadlineError;
-use rustyline::Context;
 
 fn sort_cmds() -> Vec<String> {
     let mut cmds: Vec<String> = vec![];
@@ -15,10 +15,10 @@ fn sort_cmds() -> Vec<String> {
     cmds.sort();
     let mut unrepeat = vec![];
     for cmd in &cmds {
-        if let Some(last) = unrepeat.last() {
-            if cmd == last {
-                continue;
-            }
+        if let Some(last) = unrepeat.last()
+            && cmd == last
+        {
+            continue;
         }
         unrepeat.push(cmd.to_string());
     }
