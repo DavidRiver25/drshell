@@ -73,16 +73,19 @@ pub fn find_exes() -> Vec<Exe> {
     exes
 }
 
-pub fn find_current_dir_files() -> Vec<String> {
-    let mut files = Vec::new();
+pub fn find_files_from_dir(path: &str) -> Vec<String> {
+    let mut files = vec![];
 
-    if let Ok(dir) = env::current_dir()
-        && let Ok(entries) = fs::read_dir(dir)
-    {
+    if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
             let name = entry.file_name();
             if let Some(name) = name.to_str() {
-                files.push(name.to_string());
+                let name = if entry.path().is_dir() {
+                    name.to_string() + "/"
+                } else {
+                    name.to_string()
+                };
+                files.push(name);
             }
         }
     }
