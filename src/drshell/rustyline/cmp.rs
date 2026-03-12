@@ -71,10 +71,19 @@ fn complete_cmds(line: &str, pos: usize) -> Vec<Pair> {
 fn complete_files(line: &str, mut pos: usize) -> Vec<Pair> {
     let mut result: Vec<Pair> = vec![];
     let mut prefix = &line[pos..];
+    let dir_symbol;
+    #[cfg(unix)]
+    {
+        dir_symbol = "/";
+    }
+    #[cfg(windows)]
+    {
+        dir_symbol = "\\";
+    }
 
     let mut path = "";
-    if prefix.contains("/") {
-        let pos_dir = line.rfind("/").expect("never");
+    if prefix.contains(dir_symbol) {
+        let pos_dir = line.rfind(dir_symbol).expect("never");
         path = &line[pos..=pos_dir];
         prefix = &line[pos_dir + 1..];
         pos = pos_dir + 1;
@@ -113,16 +122,13 @@ fn complete_files(line: &str, mut pos: usize) -> Vec<Pair> {
     }
 
     if result.len() == 1 {
-        let p = path.to_string() + "/" + &result[0].display;
+        let p = path.to_string() + dir_symbol + &result[0].display;
         let p = Path::new(&p);
         if p.is_file() {
             result[0].replacement += " ";
         } else if let Some(p) = p.to_str()
             && drshell_env::find_files_from_dir(p).is_empty()
         {
-            if result[0].replacement.ends_with("/") {
-                result[0].replacement.pop();
-            }
             result[0].replacement += " ";
         }
     }

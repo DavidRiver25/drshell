@@ -81,7 +81,16 @@ pub fn find_files_from_dir(path: &str) -> Vec<String> {
             let name = entry.file_name();
             if let Some(name) = name.to_str() {
                 let name = if entry.path().is_dir() {
-                    name.to_string() + "/"
+                    let mut dir_with_suffix = String::new();
+                    #[cfg(unix)]
+                    {
+                        dir_with_suffix = name.to_string() + "/";
+                    }
+                    #[cfg(windows)]
+                    {
+                        dir_with_suffix = name.to_string() + "\\";
+                    }
+                    dir_with_suffix
                 } else {
                     name.to_string()
                 };
